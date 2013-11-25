@@ -1,6 +1,8 @@
-love.filesystem.require("constants.lua")
+require("AnAL")
 
-love.filesystem.require("utils.lua")
+require("constants")
+
+require("utils")
 
 towers = {
 
@@ -60,9 +62,8 @@ towers = {
                 end
 
                 -- respond to the current state of the tower's animation
-                -- WARNING! unlike Lua's default indexes, LOVE makes this start at 0, NOT 1
                 local current_frame = self.animation:getCurrentFrame()
-
+                
                 --  detect end of animation and reset animation to first frame
                 if current_frame == self.animation:getSize() - 1 then
                     self.animation:reset()
@@ -72,17 +73,17 @@ towers = {
                 if self.target and self.target.alive then
                     -- rotate the turrent slightly, if there is one and it needs it
                     -- the 5 here is the number of degrees of leeway - i.e. a turret may be within X degrees to either side of the desired actual before we force the correct angle
-                    if self.turret and math.abs(self.current_rotation - self.destination_rotation) > 5 then
+                    if self.turret and math.abs(self.current_rotation - self.destination_rotation) > math.rad(5) then
                         -- determine which rotation direction is faster
-                        if self.destination_rotation > self.current_rotation and self.destination_rotation - self.current_rotation <= 180 then
+                        if self.destination_rotation > self.current_rotation and self.destination_rotation - self.current_rotation <= math.rad(180) then
                             self.current_rotation = self.current_rotation + self.rotation_speed * dt
-                            if self.current_rotation > 360 then
-                                self.current_rotation = self.current_rotation - 360
+                            if self.current_rotation > math.rad(360) then
+                                self.current_rotation = self.current_rotation - math.rad(360)
                             end
                         else
                             self.current_rotation = self.current_rotation - self.rotation_speed * dt
                             if self.current_rotation < 0 then
-                                self.current_rotation = self.current_rotation + 360
+                                self.current_rotation = self.current_rotation + math.rad(360)
                             end
                         end
                     elseif self.turret then
@@ -90,7 +91,7 @@ towers = {
                         self.current_rotation = self.destination_rotation
                     end
 
-                    if current_frame == 0 then
+                    if current_frame == 1 then
                         -- first instant of the attack, so start animation
                         self.animation:play()
                     end
@@ -107,7 +108,7 @@ towers = {
                         self.target = nil
                         self.is_playing_attack = false -- we reset this too so that a new sound is played next time
                     end
-                elseif current_frame > 0 and current_frame < self.attack_frame then
+                elseif current_frame > 1 and current_frame < self.attack_frame then
                     -- in this situation, the animation is playing but there is no target, so attempt to find one
                     -- as we assume that here the target was aquired, animation started, and then target destroyed by a third party
                     self.target = self:findTarget(enemies)
@@ -127,24 +128,24 @@ towers = {
                 if placement_mode or upgrade_mode then
                     -- draw a circle showing the tower's effective radius
                     love.graphics.setColor(196, 196, 128, 128)
-                    love.graphics.circle(love.draw_fill, self.x, self.y, self:range(), 32) -- last is the number of points for the circle (default 10)
+                    love.graphics.circle("fill", self.x + self.w / 2, self.y + self.h / 2, self:range(), 32) -- last is the number of points for the circle (default 10)
                 end
-                if not self.animation or self.animation:getCurrentFrame() == 0 then
+                if not self.animation or self.animation:getCurrentFrame() == 1 then
                     love.graphics.draw(self.image, self.x, self.y)
                 else
                     if self.tower_rotation then
-                        love.graphics.draw(self.animation, self.x, self.y, self.tower_rotation)
+                        self.animation:draw(self.x + self.w / 2, self.y + self.h / 2, self.tower_rotation, 1, 1, self.w / 2, self.h / 2)
                     else
-                        love.graphics.draw(self.animation, self.x, self.y)
+                        self.animation:draw(self.x, self.y)
                     end
                 end
                 if self.turret then
-                    love.graphics.draw(self.turret, self.x, self.y, self.current_rotation)
+                    love.graphics.draw(self.turret, self.x + self.w / 2, self.y + self.h / 2, self.current_rotation, 1, 1, self.w / 2, self.h / 2)
                 end
 
                 -- health bar on top of tower, which stretches the width of the tower along the bottom
-                local left = self.x - (self.w / 2)
-                local bottom = self.y + (self.h / 2)
+                local left = self.x
+                local bottom = self.y + self.h
                 local health_percent = self.health / self:max_health() -- affects color and width of the bar
 
                 if health_percent <= .2 then
@@ -154,7 +155,7 @@ towers = {
                 else
                     love.graphics.setColor(96, 180, 96, 255)
                 end
-                love.graphics.rectangle(love.draw_fill, left, bottom - 2, health_percent * self.w, 2)
+                love.graphics.rectangle("fill", left, bottom - 2, health_percent * self.w, 2)
             end
 
             },
@@ -162,7 +163,7 @@ towers = {
     LaserTower = {
 
             image = love.graphics.newImage("images/laser_cannon.png"),
-            build_sound = love.audio.newSound("sounds/build_laser_cannon.wav"),
+            build_sound = love.audio.newSource("sounds/build_laser_cannon.wav"),
             cooldown = 3, -- time between firings in seconds
             w = GRID_SIZE * 2,
             h = GRID_SIZE * 2,
@@ -193,9 +194,9 @@ towers = {
                 o.attack = model.attacks.LaserAttack -- needs to be in a function to reference model.*
 
                 o.is_playing_attack = false
-                o.attack_sound = love.audio.newSound("sounds/attack_laser_cannon.wav")
-                o.animation = love.graphics.newAnimation(self.animation_source, self.w, self.h, .05) -- last is frame speed
-                o.animation:setMode(love.mode_once) -- ensure that the animation doesn't loop
+                o.attack_sound = love.audio.newSource("sounds/attack_laser_cannon.wav")
+                o.animation = newAnimation(self.animation_source, self.w, self.h, .05, 0) -- second to last is frame speed
+                o.animation:setMode("once") -- ensure that the animation doesn't loop
                 o.animation:stop() -- don't play immediately
 
                 return o
@@ -226,8 +227,8 @@ towers = {
 
             image = love.graphics.newImage("images/pulse_cannon.png"),
             turret = love.graphics.newImage("images/pulse_turret.png"),
-            build_sound = love.audio.newSound("sounds/build_pulse_cannon.wav"),
-            rotation_speed = 150, -- number of degrees per second the turret on the tower rotates
+            build_sound = love.audio.newSource("sounds/build_pulse_cannon.wav"),
+            rotation_speed = math.rad(150), -- number of degrees per second the turret on the tower rotates
             cooldown = 2.4, -- time between firings in seconds
             w = GRID_SIZE * 2,
             h = GRID_SIZE * 2,
@@ -260,9 +261,9 @@ towers = {
                 o.destination_rotation = 0 -- where the turret should be
 
                 o.is_playing_attack = false
-                o.attack_sound = love.audio.newSound("sounds/attack_pulse_cannon.wav")
-                o.animation = love.graphics.newAnimation(self.animation_source, self.w, self.h, .05) -- last is frame speed
-                o.animation:setMode(love.mode_once) -- ensure that the animation doesn't loop
+                o.attack_sound = love.audio.newSource("sounds/attack_pulse_cannon.wav")
+                o.animation = newAnimation(self.animation_source, self.w, self.h, .05, 0) -- second to last is frame speed
+                o.animation:setMode("once") -- ensure that the animation doesn't loop
                 o.animation:stop() -- don't play immediately
 
                 return o
@@ -306,13 +307,13 @@ towers = {
                     local future_y = attack_y -- no y component for now
                     -- different equation and offset for each quadrant
                     if future_x >= self.x and future_y >= self.y then
-                        self.destination_rotation = math.deg(math.atan2(future_y - self.y, future_x - self.x)) -- atan2 takes either (opposite / adjacent) or (opposite, adjacent); the latter is faster
+                        self.destination_rotation = math.atan2(future_y - self.y, future_x - self.x) -- atan2 takes either (opposite / adjacent) or (opposite, adjacent); the latter is faster
                     elseif future_x < self.x and future_y >= self.y then
-                        self.destination_rotation = math.deg(math.atan2(self.x - future_x, future_y - self.y)) + 90
+                        self.destination_rotation = math.atan2(self.x - future_x, future_y - self.y) + math.rad(90)
                     elseif future_x < self.x and future_y < self.y then
-                        self.destination_rotation = math.deg(math.atan2(self.y - future_y, self.x - future_x)) + 180
+                        self.destination_rotation = math.atan2(self.y - future_y, self.x - future_x) + math.rad(180)
                     else
-                        self.destination_rotation = math.deg(math.atan2(future_x - self.x, self.y - future_y)) + 270
+                        self.destination_rotation = math.atan2(future_x - self.x, self.y - future_y) + math.rad(270)
                     end
                 end
 
@@ -324,7 +325,7 @@ towers = {
     MissileTower = {
 
             image = love.graphics.newImage("images/missile_cannon.png"),
-            build_sound = love.audio.newSound("sounds/build_missile_cannon.wav"),
+            build_sound = love.audio.newSource("sounds/build_missile_cannon.wav"),
             cooldown = 4, -- time between firings in seconds
             w = GRID_SIZE * 2,
             h = GRID_SIZE * 2,
@@ -356,9 +357,9 @@ towers = {
                 o.tower_rotation = 0 -- how much the tower should be rotated when drawn
 
                 o.is_playing_attack = false
-                o.attack_sound = love.audio.newSound("sounds/attack_missile_cannon.wav")
-                o.animation = love.graphics.newAnimation(self.animation_source, self.w, self.h, .05) -- last is frame speed
-                o.animation:setMode(love.mode_once) -- ensure that the animation doesn't loop
+                o.attack_sound = love.audio.newSource("sounds/attack_missile_cannon.wav")
+                o.animation = newAnimation(self.animation_source, self.w, self.h, .05, 0) -- second to last is frame speed
+                o.animation:setMode("once") -- ensure that the animation doesn't loop
                 o.animation:stop() -- don't play immediately
 
                 return o
@@ -395,11 +396,11 @@ towers = {
                     if math.abs(delta_x) >= math.abs(delta_y) and delta_x >= 0 then
                         self.tower_rotation = 0
                     elseif math.abs(delta_x) < math.abs(delta_y) and delta_y >= 0 then
-                        self.tower_rotation = 90
+                        self.tower_rotation = math.rad(90)
                     elseif math.abs(delta_x) >= math.abs(delta_y) and delta_x < 0 then
-                        self.tower_rotation = 180
+                        self.tower_rotation = math.rad(180)
                     else
-                        self.tower_rotation = 270
+                        self.tower_rotation = math.rad(270)
                     end
                 end
 

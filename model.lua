@@ -1,10 +1,10 @@
 -- contains the model classes/objects
 
-love.filesystem.require("constants.lua")
+require("constants")
 
-love.filesystem.require("enemies.lua")
-love.filesystem.require("attacks.lua")
-love.filesystem.require("towers.lua")
+require("enemies")
+require("attacks")
+require("towers")
 
 
 -- wrap it in a parent - this emulates being a module, and allows use of dot notation
@@ -57,7 +57,7 @@ model = {
            },
 
     TextMenuItem = {
-            font = love.graphics.newFont(love.default_font, 18),
+            font = love.graphics.newFont(18),
 
             new = function (self, text, x, y)
                 -- create a new object, and initialize its attributes
@@ -84,7 +84,9 @@ model = {
                     love.graphics.setColor(0, 128, 255, 128)
                 end
                 love.graphics.setFont(self.font)
-                love.graphics.draw(self.text, self.x, self.y)
+                love.graphics.setColorMode("modulate")
+                love.graphics.print(self.text, self.x, self.y)
+                love.graphics.setColorMode("replace")
             end
             },
 
@@ -122,7 +124,7 @@ model = {
 
     TowerMenuItem = {
 
-            font = love.graphics.newFont(love.default_font, 18),
+            font = love.graphics.newFont(18),
             vertical_spacing = 80, -- distance between towers appearing on top of each other
 
             new = function (self, x, y)
@@ -135,7 +137,7 @@ model = {
                 o.towers = {model.towers.PulseTower, model.towers.LaserTower, model.towers.MissileTower}
                 o.items = {}
                 for i, tower_model in ipairs(o.towers) do
-                    o.items[i] = model.ImageMenuItem:new(tower_model.image, x, y - self.vertical_spacing * (i - 1))
+                    o.items[i] = model.ImageMenuItem:new(tower_model.image, x, y - self.vertical_spacing * (i - 1) - 14)
                     if tower_model.turret then
                         o.items[i].turret = tower_model.turret
                     end
@@ -149,12 +151,12 @@ model = {
             end,
 
             update = function(self, dt)
-                if love.keyboard.isDown(love.key_up) or love.keyboard.isDown(love.key_w) then
+                if love.keyboard.isDown("up") or love.keyboard.isDown("w") then
                     self.selected_index = self.selected_index + 1
                     if self.selected_index > table.getn(self.items) then
                         self.selected_index = 1
                     end
-                elseif love.keyboard.isDown(love.key_down) or love.keyboard.isDown(love.key_s) then
+                elseif love.keyboard.isDown("down") or love.keyboard.isDown("s") then
                     self.selected_index = self.selected_index - 1
                     if self.selected_index < 1 then
                         self.selected_index = table.getn(self.items)
@@ -175,7 +177,7 @@ model = {
 
                         -- move the y positions around to make sense again
                         for i, item in ipairs(self.items) do
-                            item.y = self.y - self.vertical_spacing * (i - 1)
+                            item.y = self.y - self.vertical_spacing * (i - 1) - 14
                         end
                     end
 
@@ -192,7 +194,7 @@ model = {
                     else
                         -- draw a background for the towers to appear on
                         love.graphics.setColor(128, 128, 128, 64)
-                        love.graphics.rectangle(love.draw_fill, self.x - 40, self.y - (self.vertical_offset - 40), 80, self.vertical_offset)
+                        love.graphics.rectangle("fill", self.x - 7, self.y - (self.vertical_offset - 60), 80, self.vertical_offset)
 
                         -- draw each of the image items
                         for i, item in ipairs(self.items) do
@@ -202,18 +204,20 @@ model = {
                         -- draw the values to the right
                         -- background
                         love.graphics.setColor(128, 128, 128, 64)
-                        love.graphics.rectangle(love.draw_fill, self.x + 60, self.y - 280, 300, 220)
+                        love.graphics.rectangle("fill", self.x + 110, self.y - 280, 300, 220)
 
                         -- text (name, cost, bar titles)
                         local tower = self.towers[self.selected_index]
                         love.graphics.setFont(self.font)
+                        love.graphics.setColorMode("modulate")
                         love.graphics.setColor(228, 228, 228, 255)
-                        love.graphics.draw(tower.name, self.x + 70, self.y - 255)
-                        love.graphics.draw("$"..model.towers.Tower.cost(tower), self.x + 305, self.y - 255)
+                        love.graphics.print(tower.name, self.x + 120, self.y - 270)
+                        love.graphics.print("$"..model.towers.Tower.cost(tower), self.x + 305, self.y - 270)
                         love.graphics.setColor(196, 196, 196, 255)
-                        love.graphics.draw("Firepower", self.x + 70, self.y - 225)
-                        love.graphics.draw("Range", self.x + 70, self.y - 165)
-                        love.graphics.draw("Health", self.x + 70, self.y - 105)
+                        love.graphics.print("Firepower", self.x + 120, self.y - 240)
+                        love.graphics.print("Range", self.x + 120, self.y - 180)
+                        love.graphics.print("Health", self.x + 120, self.y - 120)
+                        love.graphics.setColorMode("replace")
 
                         -- bars
                         local max_pixels = 280 -- number of pixels that represent 100% (width of background - 2 * padding)
@@ -221,9 +225,9 @@ model = {
                         local max_range = 330 -- largest range
                         local max_health = 1200 -- largest health
                         love.graphics.setColor(128, 164, 196, 255)
-                        love.graphics.rectangle(love.draw_fill, self.x + 70, self.y - 215, (model.towers.Tower.power(tower) / tower.cooldown) / max_firepower * max_pixels, 20) -- Tower of Power!
-                        love.graphics.rectangle(love.draw_fill, self.x + 70, self.y - 155, model.towers.Tower.range(tower) / max_range * max_pixels, 20)
-                        love.graphics.rectangle(love.draw_fill, self.x + 70, self.y - 95, model.towers.Tower.max_health(tower) / max_health * max_pixels, 20)
+                        love.graphics.rectangle("fill", self.x + 120, self.y - 215, (model.towers.Tower.power(tower) / tower.cooldown) / max_firepower * max_pixels, 20) -- Tower of Power!
+                        love.graphics.rectangle("fill", self.x + 120, self.y - 155, model.towers.Tower.range(tower) / max_range * max_pixels, 20)
+                        love.graphics.rectangle("fill", self.x + 120, self.y - 95, model.towers.Tower.max_health(tower) / max_health * max_pixels, 20)
                     end
                 else
                     self.items[1]:draw(false)
@@ -243,8 +247,8 @@ model = {
                 setmetatable(o, self)
                 self.__index = self
 
-                o.x = x -- horizontal center of the menu
-                o.y = y -- vertical center of the menu
+                o.x = x -- left of the menu
+                o.y = y -- top of the menu
                 o.w = w -- width of the menu
 
                 o.items = {}
@@ -252,11 +256,14 @@ model = {
                 o.last_update = 0 -- time since last selected index change
 
                 -- construct the individual items of the menu
-                local item_y = o.y + 7
+                local item_y = o.y + 32
                 o.items[1] = model.TextMenuItem:new("Quit", 100, item_y)
-                o.items[1].activate = function(self) love.system.exit() end
+                o.items[1].activate = function(self) love.event.quit() end
                 o.items[2] = model.TextMenuItem:new("Restart Level", 240, item_y)
-                o.items[2].activate = function(self) love.system.restart() end
+                o.items[2].activate = function(self)
+                    -- TODO: this functionality has been removed, so replace it manually
+                    --love.system.restart()
+                end
                 o.items[3] = model.TextMenuItem:new("Start Wave", 480, item_y)
                 o.items[3].activate = function(self) if run then run_wave = true end end -- defined in main.lua
                 o.items[4] = model.TowerMenuItem:new(720, item_y - 5) -- has a built-in activate method
@@ -277,20 +284,20 @@ model = {
 
             update = function(self, dt)
                 if self.last_update >= self.update_time then
-                    if love.keyboard.isDown(love.key_return) then
+                    if love.keyboard.isDown("return") then
                         self.items[self.selected_index]:activate()
-                    elseif love.keyboard.isDown(love.key_right) or love.keyboard.isDown(love.key_d) then
+                    elseif love.keyboard.isDown("right") or love.keyboard.isDown("d") then
                         self.selected_index = self.selected_index + 1
                         if self.selected_index > table.getn(self.items) then
                             self.selected_index = 1
                         end
-                    elseif love.keyboard.isDown(love.key_left) or love.keyboard.isDown(love.key_a) then
+                    elseif love.keyboard.isDown("left") or love.keyboard.isDown("a") then
                         self.selected_index = self.selected_index - 1
                         if self.selected_index < 1 then
                             self.selected_index = table.getn(self.items)
                         end
-                    elseif love.keyboard.isDown(love.key_escape) then
-                        love.system.exit()
+                    elseif love.keyboard.isDown("escape") then
+                        love.event.quit()
                     else
                         self.items[self.selected_index]:update()
                     end
@@ -329,7 +336,7 @@ model = {
 
                 o.last_update = 0
                 o.tower_model = model.towers.PulseTower -- default
-                o.tower = o.tower_model:new(o.x + o.w / 2 - GRID_SIZE / 2, o.y + o.h / 2 - GRID_SIZE / 2) -- close to center
+                o.tower = o.tower_model:new(o.x, o.y)
                 o.obstructed = false -- the tower is over something so it can't build there
 
                 return o
@@ -337,10 +344,10 @@ model = {
 
             update = function(self, dt)
                 if self.last_update >= self.update_time then
-                    if love.keyboard.isDown(love.key_backspace) then
+                    if love.keyboard.isDown("backspace") then
                         placement_mode = false
 
-                    elseif love.keyboard.isDown(love.key_return) then
+                    elseif love.keyboard.isDown("return") then
                         if not self.obstructed then
                             if bank >= self.tower:cost() then
                                 -- put a new tower down here
@@ -358,23 +365,23 @@ model = {
 
                     else
 
-                        if love.keyboard.isDown(love.key_up) or love.keyboard.isDown(love.key_w) then
-                            if self.tower.y > self.y + GRID_SIZE then
+                        if love.keyboard.isDown("up") or love.keyboard.isDown("w") then
+                            if self.tower.y >= self.y + GRID_SIZE then
                                 self.tower.y = self.tower.y - GRID_SIZE
                             end
                         end
-                        if love.keyboard.isDown(love.key_right) or love.keyboard.isDown(love.key_d) then
+                        if love.keyboard.isDown("right") or love.keyboard.isDown("d") then
                             if self.tower.x < self.x + self.w - GRID_SIZE then
                                 self.tower.x = self.tower.x + GRID_SIZE
                             end
                         end
-                        if love.keyboard.isDown(love.key_down) or love.keyboard.isDown(love.key_s) then
+                        if love.keyboard.isDown("down") or love.keyboard.isDown("s") then
                             if self.tower.y < self.y + self.h - GRID_SIZE then
                                 self.tower.y = self.tower.y + GRID_SIZE
                             end
                         end
-                        if love.keyboard.isDown(love.key_left) or love.keyboard.isDown(love.key_a) then
-                            if self.tower.x > self.x + GRID_SIZE then
+                        if love.keyboard.isDown("left") or love.keyboard.isDown("a") then
+                            if self.tower.x >= self.x + GRID_SIZE then
                                 self.tower.x = self.tower.x - GRID_SIZE
                             end
                         end
@@ -400,7 +407,7 @@ model = {
             draw = function(self)
                 -- draw transparent bg
                 love.graphics.setColor(128, 128, 128, 96)
-                love.graphics.rectangle(love.draw_fill, self.x, self.y, self.w, self.h)
+                love.graphics.rectangle("fill", self.x, self.y, self.w, self.h)
 
                 -- draw lines
                 love.graphics.setColor(164, 164, 164, 196)
@@ -420,7 +427,7 @@ model = {
                 else
                     love.graphics.setColor(128, 164, 196, 196)
                 end
-                love.graphics.rectangle(love.draw_fill, self.tower.x - GRID_SIZE, self.tower.y - GRID_SIZE, self.tower.w, self.tower.h)
+                love.graphics.rectangle("fill", self.tower.x, self.tower.y, self.tower.w, self.tower.h)
                 self.tower:draw()
             end
             },
@@ -428,7 +435,7 @@ model = {
     Upgrade = {
 
             outline = love.graphics.newImage("images/outline_selected.png"),
-            font = love.graphics.newFont(love.default_font, 18),
+            font = love.graphics.newFont(18),
             update_time = .1,
 
             new = function (self, x, y, w, h)
@@ -457,10 +464,10 @@ model = {
 
             update = function(self, dt)
                 if self.last_update >= self.update_time then
-                    if love.keyboard.isDown(love.key_backspace) then
+                    if love.keyboard.isDown("backspace") then
                         upgrade_mode = false
 
-                    elseif love.keyboard.isDown(love.key_return) then
+                    elseif love.keyboard.isDown("return") then
                         if self.tower then
                             local next_level = self.tower.level + 1
                             if next_level <= table.getn(self.tower.stats) then
@@ -483,23 +490,23 @@ model = {
                         end
                     else
 
-                        if love.keyboard.isDown(love.key_up) or love.keyboard.isDown(love.key_w) then
-                            if self.cursor_y > self.y + GRID_SIZE then
+                        if love.keyboard.isDown("up") or love.keyboard.isDown("w") then
+                            if self.cursor_y >= self.y + GRID_SIZE then
                                 self.cursor_y = self.cursor_y - GRID_SIZE
                             end
                         end
-                        if love.keyboard.isDown(love.key_right) or love.keyboard.isDown(love.key_d) then
+                        if love.keyboard.isDown("right") or love.keyboard.isDown("d") then
                             if self.cursor_x < self.x + self.w - GRID_SIZE then
                                 self.cursor_x = self.cursor_x + GRID_SIZE
                             end
                         end
-                        if love.keyboard.isDown(love.key_down) or love.keyboard.isDown(love.key_s) then
+                        if love.keyboard.isDown("down") or love.keyboard.isDown("s") then
                             if self.cursor_y < self.y + self.h - GRID_SIZE then
                                 self.cursor_y = self.cursor_y + GRID_SIZE
                             end
                         end
-                        if love.keyboard.isDown(love.key_left) or love.keyboard.isDown(love.key_a) then
-                            if self.cursor_x > self.x + GRID_SIZE then
+                        if love.keyboard.isDown("left") or love.keyboard.isDown("a") then
+                            if self.cursor_x >= self.x + GRID_SIZE then
                                 self.cursor_x = self.cursor_x - GRID_SIZE
                             end
                         end
@@ -526,7 +533,7 @@ model = {
             draw = function(self)
                 -- draw transparent bg
                 love.graphics.setColor(128, 128, 128, 96)
-                love.graphics.rectangle(love.draw_fill, self.x, self.y, self.w, self.h)
+                love.graphics.rectangle("fill", self.x, self.y, self.w, self.h)
 
                 -- draw lines
                 love.graphics.setColor(164, 164, 164, 196)
@@ -547,7 +554,7 @@ model = {
                         local tower_stats = self.tower.stats[next_level]
                         -- draw where the tower's radius will expand to
                         love.graphics.setColor(255, 196, 128, 64)
-                        love.graphics.circle(love.draw_fill, self.tower.x, self.tower.y, tower_stats.range, 32) -- last is the number of points for the circle (default 10)
+                        love.graphics.circle("fill", self.tower.x + self.tower.w / 2, self.tower.y + self.tower.h / 2, tower_stats.range, 32) -- last is the number of points for the circle (default 10)
 
                         local left_edge = self.x - 350
                         local left_padding = left_edge + 10
@@ -556,17 +563,19 @@ model = {
                         -- draw the values to the right
                         -- background
                         love.graphics.setColor(128, 128, 128, 196)
-                        love.graphics.rectangle(love.draw_fill, left_edge, self.y, 300, 250)
+                        love.graphics.rectangle("fill", left_edge, self.y, 300, 250)
 
                         -- text (name, cost, bar titles)
+                        love.graphics.setColorMode("modulate")
                         love.graphics.setFont(self.font)
                         love.graphics.setColor(228, 228, 228, 255)
-                        love.graphics.draw("Upgrade Level "..self.tower.level.." "..self.tower.name, left_padding, self.y + 25)
-                        love.graphics.draw("$"..tower_stats.cost, left_padding, self.y + 55)
+                        love.graphics.print("Upgrade Level "..self.tower.level.." "..self.tower.name, left_padding, self.y + 10)
+                        love.graphics.print("$"..tower_stats.cost, left_padding, self.y + 45)
                         love.graphics.setColor(196, 196, 196, 255)
-                        love.graphics.draw("Firepower", left_padding, self.y + 85)
-                        love.graphics.draw("Range", left_padding, self.y + 145)
-                        love.graphics.draw("Health", left_padding, self.y + 205)
+                        love.graphics.print("Firepower", left_padding, self.y + 70)
+                        love.graphics.print("Range", left_padding, self.y + 130)
+                        love.graphics.print("Health", left_padding, self.y + 190)
+                        love.graphics.setColorMode("replace")
 
                         -- bars
                         local max_pixels = 280 -- number of pixels that represent 100% (width of background - 2 * padding)
@@ -576,26 +585,28 @@ model = {
 
                         -- next level bars
                         love.graphics.setColor(128, 196, 164, 255)
-                        love.graphics.rectangle(love.draw_fill, left_padding, self.y + 95, (tower_stats.power / self.tower.cooldown) / max_firepower * max_pixels, 20)
-                        love.graphics.rectangle(love.draw_fill, left_padding, self.y + 155, tower_stats.range / max_range * max_pixels, 20)
-                        love.graphics.rectangle(love.draw_fill, left_padding, self.y + 215, tower_stats.health / max_health * max_pixels, 20)
+                        love.graphics.rectangle("fill", left_padding, self.y + 95, (tower_stats.power / self.tower.cooldown) / max_firepower * max_pixels, 20)
+                        love.graphics.rectangle("fill", left_padding, self.y + 155, tower_stats.range / max_range * max_pixels, 20)
+                        love.graphics.rectangle("fill", left_padding, self.y + 215, tower_stats.health / max_health * max_pixels, 20)
 
                         -- current level bars
                         love.graphics.setColor(128, 164, 196, 255)
-                        love.graphics.rectangle(love.draw_fill, left_padding, self.y + 95, (self.tower:power() / self.tower.cooldown) / max_firepower * max_pixels, 20) -- Tower of Power!
-                        love.graphics.rectangle(love.draw_fill, left_padding, self.y + 155, self.tower:range() / max_range * max_pixels, 20)
-                        love.graphics.rectangle(love.draw_fill, left_padding, self.y + 215, self.tower:max_health() / max_health * max_pixels, 20)
+                        love.graphics.rectangle("fill", left_padding, self.y + 95, (self.tower:power() / self.tower.cooldown) / max_firepower * max_pixels, 20) -- Tower of Power!
+                        love.graphics.rectangle("fill", left_padding, self.y + 155, self.tower:range() / max_range * max_pixels, 20)
+                        love.graphics.rectangle("fill", left_padding, self.y + 215, self.tower:max_health() / max_health * max_pixels, 20)
 
                     else
                         -- display something about max level
                         -- background
                         love.graphics.setColor(128, 128, 128, 64)
-                        love.graphics.rectangle(love.draw_fill, self.x - 350, self.y, 300, 250)
+                        love.graphics.rectangle("fill", self.x - 350, self.y, 300, 250)
 
                         -- text (name, cost, bar titles)
                         love.graphics.setFont(self.font)
                         love.graphics.setColor(228, 228, 228, 255)
-                        love.graphics.draw(self.tower.name.." - MAX LEVEL!", self.x - 340, self.y + 25)
+                        self.setColorMode("modulate")
+                        love.graphics.print(self.tower.name.." - MAX LEVEL!", self.x - 340, self.y + 25)
+                        self.setColorMode("replace")
                     end
                 end
 
@@ -607,7 +618,7 @@ model = {
                 -- flash red if they can't afford it
                 if self.not_enough_funds then
                     love.graphics.setColor(196, 96, 128, 196)
-                    love.graphics.rectangle(love.draw_fill, self.tower.x - GRID_SIZE, self.tower.y - GRID_SIZE, self.tower.w, self.tower.h)
+                    love.graphics.rectangle("fill", self.tower.x, self.tower.y, self.tower.w, self.tower.h)
                 end
 
                 -- outer select box
@@ -616,8 +627,8 @@ model = {
             },
 
     Level = {
-            win_sound = love.audio.newSound("sounds/level_win.wav"),
-            lose_sound = love.audio.newSound("sounds/level_lose.wav"),
+            win_sound = love.audio.newSource("sounds/level_win.wav"),
+            lose_sound = love.audio.newSource("sounds/level_lose.wav"),
             fade_rate = .1, -- % / s
             update_time = .2,
 
@@ -631,10 +642,10 @@ model = {
                 o.last_update = 0
 
                 -- love can't handle 2 "music" pieces at once (or different music volumes ) - so we use sounds instead
-                o.setup_music = love.audio.newSound("sounds/level_2_setup.ogg")
+                o.setup_music = love.audio.newSource("sounds/level_2_setup.ogg")
                 o.setup_volume = 1
                 
-                o.battle_music = love.audio.newSound("sounds/level_2_battle.ogg")
+                o.battle_music = love.audio.newSource("sounds/level_2_battle.ogg")
                 o.battle_volume = 0
                 o.battle_music:setVolume(0) -- start this one at silent
 
@@ -677,7 +688,7 @@ model = {
                     end
                 end
                 if self.last_update >= self.update_time then
-                    if run and love.keyboard.isDown(love.key_p) then
+                    if run and love.keyboard.isDown("p") then
                         if paused then
                             love.audio.setVolume(1)
                             paused = false
@@ -696,14 +707,18 @@ model = {
                 love.graphics.setColor(128, 164, 196, 255)
                 love.graphics.setFont(normal_font)
                 local wave_text = "WAVE " .. self.active_wave .. "/" .. table.getn(self.waves)
-                love.graphics.draw(wave_text, love.graphics.getWidth() - 435, 36)
+                love.graphics.setColorMode("modulate")
+                love.graphics.print(wave_text, love.graphics.getWidth() - 435, 20)
+                love.graphics.setColorMode("replace")
 
                 if paused then
                     love.graphics.setColor(128, 128, 128, 128)
-                    love.graphics.rectangle(love.draw_fill, 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+                    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
                     love.graphics.setFont(large_font)
                     love.graphics.setColor(228, 228, 255, 255)
-                    love.graphics.drawf("PAUSED", 0, love.graphics.getHeight() / 2 - 16, love.graphics.getWidth() + 8, love.align_center)
+                    love.graphics.setColorMode("modulate")
+                    love.graphics.printf("PAUSED", 0, love.graphics.getHeight() / 2 - 16, love.graphics.getWidth() + 8, "center")
+                    love.graphics.setColorMode("replace")
                 end
             end,
 

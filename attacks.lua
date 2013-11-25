@@ -1,4 +1,4 @@
-love.filesystem.require("utils.lua")
+require("utils")
 
 attacks = {
 
@@ -74,7 +74,7 @@ attacks = {
             draw = function (self)
                 love.graphics.setLineWidth(2)
                 love.graphics.setColor(255, 0, 0, 164)
-                love.graphics.line(self.tower.x, self.tower.y, self.target.x, self.target.y)
+                love.graphics.line(self.tower.x + self.tower.w / 2, self.tower.y + self.tower.h / 2, self.target.x + self.target.w / 2, self.target.y + self.target.h / 2)
             end
 
             },
@@ -98,8 +98,8 @@ attacks = {
                 o.power = tower:power() -- how strong the attack is
 
                 -- OPTIONAL Attack properties
-                o.x = tower.x -- we record these rather than the tower to make this attack independent once launched
-                o.y = tower.y
+                o.x = tower.x + tower.w / 2 -- we record these rather than the tower to make this attack independent once launched
+                o.y = tower.y + tower.h / 2
                 o.start_x = o.x -- coords for where the projectile begins
                 o.start_y = o.y
 
@@ -110,7 +110,7 @@ attacks = {
                 -- time = current distance / (projectile speed - enemy speed)
 
                 -- but now we need to predict the future a bit to account for the animation
-                local distance = ((target.x - o.x)^2 + (target.y - o.y)^2)^.5
+                local distance = ((target.x + target.w / 2 - o.x)^2 + (target.y + target.h / 2 - o.y)^2)^.5
 
                 -- this check is for seeing if the enemy is coming at or going away from the tower (flips the signs on the math)
                 local duration
@@ -121,8 +121,8 @@ attacks = {
                 end
 
                 -- more OPTIONAL properties
-                o.destination_x = target.x - (target.speed * duration)
-                o.destination_y = target.y -- no y component for now
+                o.destination_x = target.x + target.w / 2 - (target.speed * duration)
+                o.destination_y = target.y + target.h / 2 -- no y component for now
 
                 -- and how much of that is each component
                 local destination_distance = ((o.destination_x - o.x)^2 + (o.destination_y - o.y)^2)^.5
@@ -135,7 +135,7 @@ attacks = {
             complete = function(self)
                 -- the attack is complete if the distance from the projectile to the enemy is < a grid square
                 if self.target.alive then
-                    local distance = ((self.target.x - self.x)^2 + (self.target.y - self.y)^2)^.5
+                    local distance = ((self.target.x + self.target.w / 2 - self.x)^2 + (self.target.y + self.target.h / 2 - self.y)^2)^.5
                     -- NOTE: anything less than 11 here and the prediction algorithm will (rarely) miss the target - looks really buggy
                     if distance < 11 then
                         return true
@@ -201,7 +201,7 @@ attacks = {
 
             -- OPTIONAL
             speed = 100, -- how fast the projectile attack travels
-            hit_sound = love.audio.newSound("sounds/hit_missile_cannon.wav"),
+            hit_sound = love.audio.newSource("sounds/hit_missile_cannon.wav"),
             projectile = love.graphics.newImage("images/missile.png"),
             time_to_clear = .3, -- the amount of time required for the missile to clear the tower
             splash_range = 120, -- the radius in pixels of how far the splash damage extends out to
@@ -223,17 +223,17 @@ attacks = {
                 o.rotation = tower.tower_rotation
                 -- the rotation of the tower effects the starting position of the missile
                 if o.rotation == 0 then
-                    o.x = tower.x + 15
-                    o.y = tower.y - 12
-                elseif o.rotation == 90 then
-                    o.x = tower.x + 12
-                    o.y = tower.y + 15
-                elseif o.rotation == 180 then
-                    o.x = tower.x - 15
-                    o.y = tower.y + 12
+                    o.x = tower.x + tower.w / 2 + 15
+                    o.y = tower.y + tower.h / 2 - 12
+                elseif o.rotation == math.rad(90) then
+                    o.x = tower.x + tower.w / 2 + 12
+                    o.y = tower.y + tower.h / 2 + 15
+                elseif o.rotation == math.rad(180) then
+                    o.x = tower.x + tower.w / 2 - 15
+                    o.y = tower.y + tower.h / 2 + 12
                 else
-                    o.x = tower.x - 12
-                    o.y = tower.y - 15
+                    o.x = tower.x + tower.w / 2 - 12
+                    o.y = tower.y + tower.h / 2 - 15
                 end
 
                 return o
@@ -241,7 +241,7 @@ attacks = {
 
             complete = function(self)
                 -- the attack is complete if the distance from the projectile to the enemy is < a grid square
-                local distance = ((self.target.x - self.x)^2 + (self.target.y - self.y)^2)^.5
+                local distance = ((self.target.x + self.target.w / 2 - self.x)^2 + (self.target.y + self.target.h / 2 - self.y)^2)^.5
                 if distance < 10 or not self.target.alive then
                     return true
                 else
@@ -253,7 +253,7 @@ attacks = {
                 for i, enemy in ipairs(enemies) do
                     -- only check the distance for enemies that are actually on the screen
                     if enemy.alive and enemy.x <= love.graphics.getWidth() then
-                        local distance = ((enemy.x - self.x)^2 + (enemy.y - self.y)^2)^.5
+                        local distance = ((enemy.x + enemy.h / 2 - self.x)^2 + (enemy.y + enemy.h / 2 - self.y)^2)^.5
                         if enemy ~= self.target and distance < self.splash_range then
                             -- linear dropoff of damage
                             local percent_damage = self.power * (distance / self.splash_range)
@@ -273,34 +273,34 @@ attacks = {
                 -- but only if enough time has passed for the missile to clear the tower
                 if self.elapsed > self.time_to_clear then
                     -- move the projectile's position toward the enemy a certain distance every second
-                    if self.x > self.target.x then
+                    if self.x > self.target.x + self.target.w / 2 then
                         self.x = self.x - (self.speed * dt)
                     else
                         self.x = self.x + (self.speed * dt)
                     end
-                    if self.y > self.target.y then
+                    if self.y > self.target.y + self.target.h / 2 then
                         self.y = self.y - (self.speed * dt)
                     else
                         self.y = self.y + (self.speed * dt)
                     end
 
                     -- rotation
-                    if self.target.x >= self.x and self.target.y >= self.y then
-                        self.rotation = math.deg(math.atan2(self.target.y - self.y, self.target.x - self.x)) -- atan2 takes either (opposite / adjacent) or (opposite, adjacent); the latter is faster
-                    elseif self.target.x < self.x and self.target.y >= self.y then
-                        self.rotation = math.deg(math.atan2(self.x - self.target.x, self.target.y - self.y)) + 90
-                    elseif self.target.x < self.x and self.target.y < self.y then
-                        self.rotation = math.deg(math.atan2(self.y - self.target.y, self.x - self.target.x)) + 180
+                    if self.target.x + self.target.w / 2 >= self.x and self.target.y + self.target.h / 2 >= self.y then
+                        self.rotation = math.atan2(self.target.y + self.target.h / 2 - self.y, self.target.x + self.target.w / 2 - self.x) -- atan2 takes either (opposite / adjacent) or (opposite, adjacent); the latter is faster
+                    elseif self.target.x + self.target.w / 2 < self.x and self.target.y + self.target.h / 2 >= self.y then
+                        self.rotation = math.atan2(self.x - (self.target.x + self.target.w / 2), self.target.y + self.target.h / 2 - self.y) + math.rad(90)
+                    elseif self.target.x + self.target.w / 2 < self.x and self.target.y + self.target.h / 2 < self.y then
+                        self.rotation = math.atan2(self.y - (self.target.y + self.target.h / 2), self.x - (self.target.x + self.target.w / 2)) + math.rad(180)
                     else
-                        self.rotation = math.deg(math.atan2(self.target.x - self.x, self.y - self.target.y)) + 270
+                        self.rotation = math.atan2(self.target.x + self.target.w / 2 - self.x, self.y - (self.target.y + self.target.h / 2)) + math.rad(270)
                     end
                 else
                     -- otherwise, just move it in a straight line according to the rotation
                     if self.rotation == 0 then
                         self.x = self.x + (self.speed * dt)
-                    elseif self.rotation == 90 then
+                    elseif self.rotation == math.rad(90) then
                         self.y = self.y + (self.speed * dt)
-                    elseif self.rotation == 180 then
+                    elseif self.rotation == math.rad(180) then
                         self.x = self.x - (self.speed * dt)
                     else
                         self.y = self.y - (self.speed * dt)

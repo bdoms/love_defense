@@ -73,14 +73,14 @@ end
 
 -- write some text to a log file
 log = function(text)
-    -- outputs to /home/usr/.love/gamefolder/log.txt
+    -- outputs to ~/.local/share/love/[game_folder]/log.txt
     if text == nil then
         -- convert a nil value into a string
         text = ""
     end
-    local f = love.filesystem.newFile("log.txt", love.file_append)
-    love.filesystem.open(f)
-    love.filesystem.write(f, text.."\n")
-    love.filesystem.close(f)
+    local f = love.filesystem.newFile("log.txt")
+    f:open("w") -- append mode
+    f:write(text.."\n")
+    f:close()
 end
 

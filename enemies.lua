@@ -4,8 +4,8 @@ enemies = {
     Enemy = {
 
             image = love.graphics.newImage("images/enemy.png"),
-            destroy_sound = love.audio.newSound("sounds/enemy_explosion.wav"),
-            win_sound = love.audio.newSound("sounds/enemy_reaches_planet.wav"),
+            destroy_sound = love.audio.newSource("sounds/enemy_explosion.wav"),
+            win_sound = love.audio.newSource("sounds/enemy_reaches_planet.wav"),
             speed = 50, -- pixels / second
 
             new = function (self, x)
@@ -17,6 +17,8 @@ enemies = {
 
                 o.x = x
                 o.y = love.graphics.getHeight() / 2 - 40
+                o.w = o.image:getWidth()
+                o.h = o.image:getHeight()
                 o.health = 100
                 o.alive = true
 
@@ -27,11 +29,9 @@ enemies = {
                 o.particles:setDirection(0)
                 o.particles:setSpread(180)
                 o.particles:setSpeed(20)
-                o.particles:setSize(.2, .7)
+                o.particles:setSizes(.2, .7)
                 o.particles:setRadialAcceleration(-20)
-                start_color = love.graphics.newColor(220, 105, 20, 255) --(255, 0, 0)
-                end_color = love.graphics.newColor(194, 30, 18, 0) --(255, 255, 0)
-                o.particles:setColor(start_color, end_color)
+                o.particles:setColors(220, 105, 20, 255, 194, 30, 18, 0)
                 o.particles:start()
 
                 return o
@@ -52,9 +52,9 @@ enemies = {
 
             draw = function (self)
                 love.graphics.draw(self.image, self.x, self.y)
-                love.graphics.setColorMode(love.color_modulate)
-                love.graphics.draw(self.particles, self.x + 8, self.y)
-                love.graphics.setColorMode(love.color_normal)
+                love.graphics.setColorMode("modulate")
+                love.graphics.draw(self.particles, self.x + self.w / 2 + 8, self.y + self.h / 2)
+                love.graphics.setColorMode("replace")
             end,
 
             attack = function(self, power)

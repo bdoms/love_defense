@@ -1,7 +1,7 @@
 -- demo of space tower defense game
 -- current resolution (defined in game.conf) is 1080p / 2
 
-love.filesystem.require("model.lua")
+require("model")
 
 -- globals
 elapsed = 0
@@ -28,11 +28,11 @@ attacks = {}
 
 -- each of these three top-level functions is required for love
 
-function load()
+function love.load()
 
     -- font must be set before ANYTHING can be written
-    normal_font = love.graphics.newFont(love.default_font, 18)
-    large_font = love.graphics.newFont(love.default_font, 72)
+    normal_font = love.graphics.newFont(18)
+    large_font = love.graphics.newFont(72)
     love.graphics.setFont(large_font)
 
     -- initiate the level data
@@ -44,11 +44,11 @@ function load()
     -- load up the image and set it's static position
     -- note that image coordinates in love are for the image CENTER (this changes in version 0.6)
     planet = love.graphics.newImage("images/planet.png")
-    planet_x = 170
-    planet_y = love.graphics.getHeight() / 2 - 50
+    planet_x = 170 - planet:getWidth() / 2
+    planet_y = love.graphics.getHeight() / 2 - planet:getHeight() / 2 - 50
 
     -- setup the user interface
-    menu = model.Menu:new(love.graphics.getWidth() / 2, love.graphics.getHeight() - 40, love.graphics.getWidth())
+    menu = model.Menu:new(0, love.graphics.getHeight() - 80, love.graphics.getWidth())
 
     grid = model.Grid:new(finish_line, 60, love.graphics.getWidth() - finish_line - 10, love.graphics.getHeight() - 150)
 
@@ -72,7 +72,7 @@ function load()
 
 end
 
-function update(dt)
+function love.update(dt)
     -- dt is delta time: time in seconds since last update
     elapsed = elapsed + dt
 
@@ -161,7 +161,9 @@ function update(dt)
 
 end
 
-function draw()
+function love.draw()
+
+    love.graphics.setColorMode("replace")
 
     -- bg stars
     for i, star in ipairs(stars) do
@@ -203,12 +205,14 @@ function draw()
     -- money
     love.graphics.setColor(128, 164, 196, 255)
     love.graphics.setFont(normal_font)
-    love.graphics.draw("$"..bank, love.graphics.getWidth() - 310, 36)
+    love.graphics.setColorMode("modulate")
+    love.graphics.print("$"..bank, love.graphics.getWidth() - 310, 20)
+    love.graphics.setColorMode("replace")
 
     -- health bar
     --love.graphics.setColor(128, 164, 196, 255)
     love.graphics.setLineWidth(2)
-    love.graphics.rectangle(love.draw_line, health_border[1], health_border[2], health_border[3], health_border[4])
+    love.graphics.rectangle("line", health_border[1], health_border[2], health_border[3], health_border[4])
 
     if health <= 20 then
         love.graphics.setColor(180, 96, 96, 255)
@@ -217,24 +221,26 @@ function draw()
     else
         love.graphics.setColor(96, 180, 96, 255)
     end
-    love.graphics.rectangle(love.draw_fill, health_bar[1], health_bar[2], health_bar[3] * health / 100, health_bar[4])
+    love.graphics.rectangle("fill", health_bar[1], health_bar[2], health_bar[3] * health / 100, health_bar[4])
 
     level:draw()
 
     -- ending screen
     if not run then
         love.graphics.setFont(large_font)
+        love.graphics.setColorMode("modulate")
         if victory then
             love.graphics.setColor(32, 64, 196, 255)
-            love.graphics.drawf("YOU WIN!", 0, love.graphics.getHeight() / 2 - 16, love.graphics.getWidth() + 8, love.align_center)
+            love.graphics.printf("YOU WIN!", 0, love.graphics.getHeight() / 2 - 16, love.graphics.getWidth() + 8, "center")
             love.graphics.setColor(255, 255, 255, 255)
-            love.graphics.drawf("YOU WIN!", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), love.align_center)
+            love.graphics.printf("YOU WIN!", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
         else
             love.graphics.setColor(196, 32, 64, 255)
-            love.graphics.drawf("GAME OVER", 0, love.graphics.getHeight() / 2 - 16, love.graphics.getWidth() + 8, love.align_center)
+            love.graphics.printf("GAME OVER", 0, love.graphics.getHeight() / 2 - 16, love.graphics.getWidth() + 8, "center")
             love.graphics.setColor(255, 255, 255, 255)
-            love.graphics.drawf("GAME OVER", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), love.align_center)
+            love.graphics.printf("GAME OVER", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
         end
+        love.graphics.setColorMode("replace")
     end
 
 end
