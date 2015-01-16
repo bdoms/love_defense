@@ -261,8 +261,22 @@ model = {
                 o.items[1].activate = function(self) love.event.quit() end
                 o.items[2] = model.TextMenuItem:new("Restart Level", 240, item_y)
                 o.items[2].activate = function(self)
-                    -- TODO: this functionality has been removed, so replace it manually
-                    --love.system.restart()
+                    -- reset global variables first
+                    elapsed = 0
+                    health = 100
+                    run = true
+                    paused = false
+                    victory = false
+                    run_wave = false
+                    bank = 1000
+
+                    -- then rebuild the level
+                    level = model.Level:new()
+
+                    -- and finally all the tables
+                    towers = {}
+                    attacks = {}
+                    enemies = level.waves[level.active_wave]
                 end
                 o.items[3] = model.TextMenuItem:new("Start Wave", 480, item_y)
                 o.items[3].activate = function(self) if run then run_wave = true end end -- defined in main.lua

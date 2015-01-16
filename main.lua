@@ -33,10 +33,6 @@ function love.load()
     -- font must be set before ANYTHING can be written
     normal_font = love.graphics.newFont(18)
     large_font = love.graphics.newFont(72)
-    love.graphics.setFont(large_font)
-
-    -- initiate the level data
-    level = model.Level:new()
 
     -- set the bg to something a little off-black
     love.graphics.setBackgroundColor(8, 8, 12)
@@ -64,12 +60,14 @@ function love.load()
         table.insert(stars, star)
     end
 
+    -- initiate the level data
+    level = model.Level:new()
+
     -- towers
     -- added by user
 
     -- enemies (add them from the level)
     enemies = level.waves[level.active_wave]
-
 end
 
 function love.update(dt)
