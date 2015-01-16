@@ -1,3 +1,2 @@
 
 GRID_SIZE = 30
-

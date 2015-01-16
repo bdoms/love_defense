@@ -129,6 +129,7 @@ towers = {
                     -- draw a circle showing the tower's effective radius
                     love.graphics.setColor(196, 196, 128, 128)
                     love.graphics.circle("fill", self.x + self.w / 2, self.y + self.h / 2, self:range(), 32) -- last is the number of points for the circle (default 10)
+                    love.graphics.setColor(255, 255, 255)
                 end
                 if not self.animation or self.animation:getCurrentFrame() == 1 then
                     love.graphics.draw(self.image, self.x, self.y)
@@ -156,6 +157,7 @@ towers = {
                     love.graphics.setColor(96, 180, 96, 255)
                 end
                 love.graphics.rectangle("fill", left, bottom - 2, health_percent * self.w, 2)
+                love.graphics.setColor(255, 255, 255)
             end
 
             },
@@ -410,4 +412,3 @@ towers = {
             }
 
 }
-

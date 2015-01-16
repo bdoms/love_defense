@@ -40,7 +40,7 @@ attacks = {
             new = function (self, tower, target)
                 -- create a new instance, clone its parent's attributes, and initialize new attributes
                 -- these first lines are magic for classes to work in lua
-                local o = clone({}, attacks.Attack)
+                local o = clone({}, model.attacks.Attack)
                 setmetatable(o, self)
                 self.__index = self
 
@@ -75,6 +75,7 @@ attacks = {
                 love.graphics.setLineWidth(2)
                 love.graphics.setColor(255, 0, 0, 164)
                 love.graphics.line(self.tower.x + self.tower.w / 2, self.tower.y + self.tower.h / 2, self.target.x + self.target.w / 2, self.target.y + self.target.h / 2)
+                love.graphics.setColor(255, 255, 255)
             end
 
             },
@@ -88,7 +89,7 @@ attacks = {
             new = function (self, tower, target)
                 -- create a new instance, clone its parent's attributes, and initialize new attributes
                 -- these first lines are magic for classes to work in lua
-                local o = clone({}, attacks.Attack)
+                local o = clone({}, model.attacks.Attack)
                 setmetatable(o, self)
                 self.__index = self
 
@@ -209,7 +210,7 @@ attacks = {
             new = function (self, tower, target)
                 -- create a new instance, clone its parent's attributes, and initialize new attributes
                 -- these first lines are magic for classes to work in lua
-                local o = clone({}, attacks.Attack)
+                local o = clone({}, model.attacks.Attack)
                 setmetatable(o, self)
                 self.__index = self
 

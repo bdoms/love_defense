@@ -163,8 +163,6 @@ end
 
 function love.draw()
 
-    love.graphics.setColorMode("replace")
-
     -- bg stars
     for i, star in ipairs(stars) do
         star:draw()
@@ -205,9 +203,8 @@ function love.draw()
     -- money
     love.graphics.setColor(128, 164, 196, 255)
     love.graphics.setFont(normal_font)
-    love.graphics.setColorMode("modulate")
     love.graphics.print("$"..bank, love.graphics.getWidth() - 310, 20)
-    love.graphics.setColorMode("replace")
+    love.graphics.setColor(255, 255, 255)
 
     -- health bar
     --love.graphics.setColor(128, 164, 196, 255)
@@ -222,13 +219,13 @@ function love.draw()
         love.graphics.setColor(96, 180, 96, 255)
     end
     love.graphics.rectangle("fill", health_bar[1], health_bar[2], health_bar[3] * health / 100, health_bar[4])
+    love.graphics.setColor(255, 255, 255)
 
     level:draw()
 
     -- ending screen
     if not run then
         love.graphics.setFont(large_font)
-        love.graphics.setColorMode("modulate")
         if victory then
             love.graphics.setColor(32, 64, 196, 255)
             love.graphics.printf("YOU WIN!", 0, love.graphics.getHeight() / 2 - 16, love.graphics.getWidth() + 8, "center")
@@ -240,7 +237,7 @@ function love.draw()
             love.graphics.setColor(255, 255, 255, 255)
             love.graphics.printf("GAME OVER", 0, love.graphics.getHeight() / 2 - 20, love.graphics.getWidth(), "center")
         end
-        love.graphics.setColorMode("replace")
+        love.graphics.setColor(255, 255, 255)
     end
 
 end
@@ -266,4 +263,3 @@ function garbageCollect()
     end
     enemies = alive_enemies
 end
-

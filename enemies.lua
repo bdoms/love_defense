@@ -25,7 +25,7 @@ enemies = {
                 -- setup engine particle system
                 o.particles = love.graphics.newParticleSystem(model.Star.image, 100)
                 o.particles:setEmissionRate(80)
-                o.particles:setParticleLife(.6)
+                o.particles:setParticleLifetime(.6)
                 o.particles:setDirection(0)
                 o.particles:setSpread(180)
                 o.particles:setSpeed(20)
@@ -52,9 +52,7 @@ enemies = {
 
             draw = function (self)
                 love.graphics.draw(self.image, self.x, self.y)
-                love.graphics.setColorMode("modulate")
                 love.graphics.draw(self.particles, self.x + self.w / 2 + 8, self.y + self.h / 2)
-                love.graphics.setColorMode("replace")
             end,
 
             attack = function(self, power)
@@ -72,4 +70,3 @@ enemies = {
 
             }
 }
-

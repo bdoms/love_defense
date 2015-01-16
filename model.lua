@@ -84,9 +84,8 @@ model = {
                     love.graphics.setColor(0, 128, 255, 128)
                 end
                 love.graphics.setFont(self.font)
-                love.graphics.setColorMode("modulate")
                 love.graphics.print(self.text, self.x, self.y)
-                love.graphics.setColorMode("replace")
+                love.graphics.setColor(255, 255, 255)
             end
             },
 
@@ -195,6 +194,7 @@ model = {
                         -- draw a background for the towers to appear on
                         love.graphics.setColor(128, 128, 128, 64)
                         love.graphics.rectangle("fill", self.x - 7, self.y - (self.vertical_offset - 60), 80, self.vertical_offset)
+                        love.graphics.setColor(255, 255, 255)
 
                         -- draw each of the image items
                         for i, item in ipairs(self.items) do
@@ -209,7 +209,6 @@ model = {
                         -- text (name, cost, bar titles)
                         local tower = self.towers[self.selected_index]
                         love.graphics.setFont(self.font)
-                        love.graphics.setColorMode("modulate")
                         love.graphics.setColor(228, 228, 228, 255)
                         love.graphics.print(tower.name, self.x + 120, self.y - 270)
                         love.graphics.print("$"..model.towers.Tower.cost(tower), self.x + 305, self.y - 270)
@@ -217,7 +216,7 @@ model = {
                         love.graphics.print("Firepower", self.x + 120, self.y - 240)
                         love.graphics.print("Range", self.x + 120, self.y - 180)
                         love.graphics.print("Health", self.x + 120, self.y - 120)
-                        love.graphics.setColorMode("replace")
+                        love.graphics.setColor(255, 255, 255)
 
                         -- bars
                         local max_pixels = 280 -- number of pixels that represent 100% (width of background - 2 * padding)
@@ -228,6 +227,7 @@ model = {
                         love.graphics.rectangle("fill", self.x + 120, self.y - 215, (model.towers.Tower.power(tower) / tower.cooldown) / max_firepower * max_pixels, 20) -- Tower of Power!
                         love.graphics.rectangle("fill", self.x + 120, self.y - 155, model.towers.Tower.range(tower) / max_range * max_pixels, 20)
                         love.graphics.rectangle("fill", self.x + 120, self.y - 95, model.towers.Tower.max_health(tower) / max_health * max_pixels, 20)
+                        love.graphics.setColor(255, 255, 255)
                     end
                 else
                     self.items[1]:draw(false)
@@ -428,6 +428,8 @@ model = {
                     love.graphics.setColor(128, 164, 196, 196)
                 end
                 love.graphics.rectangle("fill", self.tower.x, self.tower.y, self.tower.w, self.tower.h)
+                love.graphics.setColor(255, 255, 255)
+
                 self.tower:draw()
             end
             },
@@ -546,6 +548,7 @@ model = {
                 for line_x=self.x, self.x + self.w, GRID_SIZE do
                     love.graphics.line(line_x, self.y, line_x, self.y + self.h)
                 end
+                love.graphics.setColor(255, 255, 255)
 
                 if self.tower then
                     local next_level = self.tower.level + 1
@@ -566,7 +569,6 @@ model = {
                         love.graphics.rectangle("fill", left_edge, self.y, 300, 250)
 
                         -- text (name, cost, bar titles)
-                        love.graphics.setColorMode("modulate")
                         love.graphics.setFont(self.font)
                         love.graphics.setColor(228, 228, 228, 255)
                         love.graphics.print("Upgrade Level "..self.tower.level.." "..self.tower.name, left_padding, self.y + 10)
@@ -575,7 +577,7 @@ model = {
                         love.graphics.print("Firepower", left_padding, self.y + 70)
                         love.graphics.print("Range", left_padding, self.y + 130)
                         love.graphics.print("Health", left_padding, self.y + 190)
-                        love.graphics.setColorMode("replace")
+                        love.graphics.setColor(255, 255, 255)
 
                         -- bars
                         local max_pixels = 280 -- number of pixels that represent 100% (width of background - 2 * padding)
@@ -604,9 +606,8 @@ model = {
                         -- text (name, cost, bar titles)
                         love.graphics.setFont(self.font)
                         love.graphics.setColor(228, 228, 228, 255)
-                        self.setColorMode("modulate")
                         love.graphics.print(self.tower.name.." - MAX LEVEL!", self.x - 340, self.y + 25)
-                        self.setColorMode("replace")
+                        love.graphics.setColor(255, 255, 255)
                     end
                 end
 
@@ -619,6 +620,7 @@ model = {
                 if self.not_enough_funds then
                     love.graphics.setColor(196, 96, 128, 196)
                     love.graphics.rectangle("fill", self.tower.x, self.tower.y, self.tower.w, self.tower.h)
+                    love.graphics.setColor(255, 255, 255)
                 end
 
                 -- outer select box
@@ -707,19 +709,17 @@ model = {
                 love.graphics.setColor(128, 164, 196, 255)
                 love.graphics.setFont(normal_font)
                 local wave_text = "WAVE " .. self.active_wave .. "/" .. table.getn(self.waves)
-                love.graphics.setColorMode("modulate")
                 love.graphics.print(wave_text, love.graphics.getWidth() - 435, 20)
-                love.graphics.setColorMode("replace")
 
                 if paused then
                     love.graphics.setColor(128, 128, 128, 128)
                     love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
                     love.graphics.setFont(large_font)
                     love.graphics.setColor(228, 228, 255, 255)
-                    love.graphics.setColorMode("modulate")
                     love.graphics.printf("PAUSED", 0, love.graphics.getHeight() / 2 - 16, love.graphics.getWidth() + 8, "center")
-                    love.graphics.setColorMode("replace")
                 end
+
+                love.graphics.setColor(255, 255, 255)
             end,
 
             win = function(self)

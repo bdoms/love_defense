@@ -2,12 +2,12 @@
 
 -- object oriented help
 -- from http://stackoverflow.com/questions/1092832/how-to-create-a-class-subclass-and-properties-in-lua
-clone = function(object, ...) 
+clone = function(object, ...)
     local ret = {}
 
     -- clone base class
-    if type(object)=="table" then 
-        for k,v in pairs(object) do 
+    if type(object) == "table" then
+        for k, v in pairs(object) do
             if type(v) == "table" then
                 v = clone(v)
             end
@@ -22,14 +22,13 @@ clone = function(object, ...)
     setmetatable(ret, { __index = object })
 
     -- mix in tables
-    for _,class in ipairs(arg) do
-        for k,v in pairs(class) do 
-            if type(v) == "table" then
-                v = clone(v)
-            end
-            -- mix in v.
-            ret[k] = v
+    local class = select(1, ...)
+    for k, v in pairs(class) do
+        if type(v) == "table" then
+            v = clone(v)
         end
+        -- mix in v.
+        ret[k] = v
     end
 
     return ret
@@ -83,4 +82,3 @@ log = function(text)
     f:write(text.."\n")
     f:close()
 end
-

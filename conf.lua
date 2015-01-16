@@ -1,8 +1,8 @@
 
 function love.conf(t)
-    t.author = "Zen Otter"
+    t.author = "Brendan Doms"
     t.title = "Tower Defense"
-    t.screen.width = 1280
-    t.screen.height = 720
-    --t.screen.fullscreen = true
+    t.window.width = 1280
+    t.window.height = 720
+    --t.window.fullscreen = true
 end

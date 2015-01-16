@@ -1,7 +1,7 @@
 # Love Defense
 
 ## Legal
-Copyright &copy; 2010, [Brendan Doms](http://www.bdoms.com/) and John Shaeffer  
+Copyright &copy; 2010-2015, [Brendan Doms](http://www.bdoms.com/)  
 Code licensed under the [MIT license](http://www.opensource.org/licenses/MIT)  
 Images and sounds licensed under a [Attribution-NonCommercial-ShareAlike 3.0 Unported Creative Commons License](http://creativecommons.org/licenses/by-nc-sa/3.0/)
 
@@ -13,7 +13,7 @@ This is a simple Tower Defense game. It was created with [LÖVE](https://love2d.
 
 ## Controls
 
- * Confirm: Return
+ * Confirm: Enter
  * Cancel: Backspace
  * Quit: Escape
  * Navigation: Arrow Keys or WASD
